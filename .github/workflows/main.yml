@@ -27,7 +27,7 @@ jobs:
       - name: 获取最新版本
         id: fetch-version
         run: |
-          LATEST_VERSION=$(wget -qO- https://hub.docker.com/v2/repositories/dushixiang/next-terminal-premium/tags | jq -r '.results[] | select(.name != "latest") | .name' | head -n1)
+          LATEST_VERSION=$(wget -qO- https://hub.docker.com/v2/repositories/dushixiang/next-terminal-premium/tags | jq -r '.results[] | select(has("name") and .name != "latest" and (.name | test("cache") | not)) | .name' | head -n1)
           CURRENT_VERSION=$(cat version)
           echo "LATEST_VERSION: $LATEST_VERSION"
           if [ "$LATEST_VERSION" = "$CURRENT_VERSION" ]; then

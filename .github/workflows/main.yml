@@ -41,21 +41,21 @@ jobs:
         if: steps.fetch-version.outputs.skip_build != 'true'
         run: |
           echo "LATEST_VERSION: $LATEST_VERSION"
-          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t aaronlee/next-terminal-premium:latest --push .
+          docker buildx build --platform linux/amd64,linux/arm64 -t aaronlee/next-terminal-premium:latest --push .
 
       - name: 构建并推送 Docker 镜像（带版本号）
         if: steps.fetch-version.outputs.skip_build != 'true'
         run: |
           LATEST_VERSION=${{ steps.fetch-version.outputs.latest_version }}
           echo "LATEST_VERSION: $LATEST_VERSION"
-          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t aaronlee/next-terminal-premium:${{ steps.fetch-version.outputs.latest_version }} --push .
+          docker buildx build --platform linux/amd64,linux/arm64 -t aaronlee/next-terminal-premium:${{ steps.fetch-version.outputs.latest_version }} --push .
 
       - name: 构建并推送 Docker 镜像（带版本号和时间戳）
         if: steps.fetch-version.outputs.skip_build != 'true'
         run: |
           LATEST_VERSION=${{ steps.fetch-version.outputs.latest_version }}
           TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t aaronlee/next-terminal-premium:${{ steps.fetch-version.outputs.latest_version }}-${TIMESTAMP} --push .
+          docker buildx build --platform linux/amd64,linux/arm64 -t aaronlee/next-terminal-premium:${{ steps.fetch-version.outputs.latest_version }}-${TIMESTAMP} --push .
 
       - name: 更新版本文件并推送到 GitHub
         if: steps.fetch-version.outputs.skip_build != 'true'

@@ -1,6 +1,11 @@
 database:
   enabled: true
-  type: mysql
+ 
+
+
+
+
+type: mysql
   mysql:
     hostname: mysql
     port: 3306

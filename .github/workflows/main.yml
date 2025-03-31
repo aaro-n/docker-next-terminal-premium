@@ -37,6 +37,30 @@ jobs:
             echo "::set-output name=latest_version::$LATEST_VERSION"
           fi
 
+      - name: 比较配置文件
+        id: compare-config
+        run: |
+          CONFIG_FILES=("sql/config-mysql.yaml" "sql/config-postgres.yaml" "sql/config-sqlite.yaml")
+          REMOTE_URLS=("https://f.typesafe.cn/next-terminal/config-mysql.yaml" "https://f.typesafe.cn/next-terminal/config-postgres.yaml" "https://f.typesafe.cn/next-terminal/config-sqlite.yaml")
+          SKIP_BUILD=false
+
+          for i in "${!CONFIG_FILES[@]}"; do
+            LOCAL_FILE=${CONFIG_FILES[$i]}
+            REMOTE_FILE=$(curl -s ${REMOTE_URLS[$i]})
+            LOCAL_CONTENT=$(cat $LOCAL_FILE)
+
+            if [ "$LOCAL_CONTENT" != "$REMOTE_FILE" ]; then
+              echo "配置文件 ${LOCAL_FILE} 与远程文件不匹配，跳过构建。"
+              SKIP_BUILD=true
+              break
+            fi
+          done
+
+          if [ "$SKIP_BUILD" = true ]; then
+            echo "::set-output name=skip_build::true"
+          fi         
+
+
       - name: 构建并推送 Docker 镜像（latest）
         if: steps.fetch-version.outputs.skip_build != 'true'
         run: |

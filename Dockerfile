@@ -36,5 +36,8 @@ RUN chmod +x /etc/service/*/run && \
     cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo 'Asia/Shanghai' > /etc/timezone
 
+# 创建一个启动脚本
+RUN echo '#!/bin/sh\nexec /sbin/runit' > /start.sh && chmod +x /start.sh
+
 # 设置镜像的入口点
-ENTRYPOINT ["/sbin/runit"]
+ENTRYPOINT ["/start.sh"]

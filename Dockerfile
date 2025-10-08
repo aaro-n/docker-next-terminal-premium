@@ -3,6 +3,8 @@ FROM dushixiang/guacd:latest
 
 COPY --from=builder1 /usr/local/next-terminal /usr/local/next-terminal
 
+# 添加在容器中运行的标识
+ENV NT_IN_CONTAINER=true
 
 # 安装 runit 和其他必要的工具
 RUN apk add --no-cache s6 tzdata logrotate && \

@@ -1,11 +1,39 @@
-version: '3.4'
-
 services:
+  postgresql:
+    image: postgres:16-alpine
+    restart: always
+    container_name: next-terminal-db
+    environment:
+      POSTGRES_USER: next-terminal
+      POSTGRES_PASSWORD: next-terminal
+      POSTGRES_DB: next-terminal
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U next-terminal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   next-terminal:
     image: aaronlee/next-terminal:latest
     restart: always
     container_name: next-terminal
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      APP_DATABASE_ENABLED: "true"
+      APP_DATABASE_POSTGRES_HOSTNAME: postgresql
+      APP_DATABASE_POSTGRES_PORT: "5432"
+      APP_DATABASE_POSTGRES_USERNAME: next-terminal
+      APP_DATABASE_POSTGRES_PASSWORD: next-terminal
+      APP_DATABASE_POSTGRES_DATABASE: next-terminal
     volumes:
-      ./data:/usr/local/next-terminal/data
+      - ./data:/usr/local/next-terminal/data
     ports:
-      - 8088:8088
+      - "8088:8088"
+
+volumes:
+  postgres-data:

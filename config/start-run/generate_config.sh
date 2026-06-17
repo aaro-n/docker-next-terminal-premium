@@ -10,17 +10,18 @@ if [ -f "$TEMP_FILE" ]; then
 fi
 touch "$TEMP_FILE"
 
-# 检查配置文件是否已存在
+# 检查配置文件是否已存在（用户通过 volume 挂载的自定义配置）
 if [ -f "$CONFIG_FILE" ]; then
-    echo "配置文件已存在: $CONFIG_FILE"
+    echo "[INFO] 配置文件已存在: $CONFIG_FILE (跳过自动生成)"
     exit 0
 fi
 
-# 函数：获取环境变量值，提供默认值
+# 函数：安全获取环境变量值，提供默认值
+# 使用 ${!var_name} 间接引用语法（POSIX sh 兼容写法）
 get_env() {
   var_name="$1"
   default_value="$2"
-  eval value=\$"$var_name"
+  eval value=\"\${${var_name}-}\"
   echo "${value:-$default_value}"
 }
 
@@ -36,14 +37,14 @@ generate_database_config() {
     # 方案 A: 直接使用环境变量提供的完整 URL
     echo "  URL: \"$DB_URL\""
   else
-    # 方案 B: 仅当 URL 为空时，使用分体参数
+    # 方案 B: 使用分体参数
     cat <<EOF
   Postgres:
-    Hostname: $(get_env "APP_DATABASE_POSTGRES_HOSTNAME" "postgresql")
+    Hostname: "$(get_env "APP_DATABASE_POSTGRES_HOSTNAME" "postgresql")"
     Port: $(get_env "APP_DATABASE_POSTGRES_PORT" "5432")
-    Username: $(get_env "APP_DATABASE_POSTGRES_USERNAME" "next-terminal")
-    Password: $(get_env "APP_DATABASE_POSTGRES_PASSWORD" "next-terminal")
-    Database: $(get_env "APP_DATABASE_POSTGRES_DATABASE" "next-terminal")
+    Username: "$(get_env "APP_DATABASE_POSTGRES_USERNAME" "next-terminal")"
+    Password: "$(get_env "APP_DATABASE_POSTGRES_PASSWORD" "next-terminal")"
+    Database: "$(get_env "APP_DATABASE_POSTGRES_DATABASE" "next-terminal")"
 EOF
   fi
   echo "  ShowSql: $(get_env "APP_DATABASE_SHOW_SQL" "false")"
@@ -57,7 +58,7 @@ EOF
 
 log:
   Level: $(get_env "APP_LOG_LEVEL" "debug")
-  Filename: $(get_env "APP_LOG_FILENAME" "./logs/nt.log")
+  Filename: "$(get_env "APP_LOG_FILENAME" "./logs/nt.log")"
 
 Server:
   Addr: "$(get_env "APP_SERVER_ADDR" "0.0.0.0:8088")"
@@ -71,7 +72,7 @@ App:
   Guacd:
     Drive: "$(get_env "APP_APP_GUACD_DRIVE" "/usr/local/next-terminal/data/drive")"
     Hosts:
-      - Hostname: $(get_env "APP_APP_GUACD_HOSTS_HOSTNAME" "guacd")
+      - Hostname: "$(get_env "APP_APP_GUACD_HOSTS_HOSTNAME" "guacd")"
         Port: $(get_env "APP_APP_GUACD_HOSTS_PORT" "4822")
         Weight: $(get_env "APP_APP_GUACD_HOSTS_WEIGHT" "1")
 
@@ -91,5 +92,5 @@ $(get_env "APP_REVERSE_PROXY_IP_TRUST_LIST" '      - "0.0.0.0/0"')
 EOF
 } > "$CONFIG_FILE"
 
-echo "配置文件已生成: $CONFIG_FILE"
+echo "[INFO] 配置文件已生成: $CONFIG_FILE"
 exit 0

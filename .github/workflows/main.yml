@@ -68,7 +68,7 @@ jobs:
         if: steps.fetch-version.outputs.skip_build == 'false'
         run: |
           LOCAL_FILE="sql/config.yaml"
-          REMOTE_URL="https://f.typesafe.cn/next-terminal/config.yaml"
+          REMOTE_URL="https://f.next-terminal.com/next-terminal/config.yaml"
 
           # 下载远程配置
           if ! curl -sSf "$REMOTE_URL" -o /tmp/remote_config.yaml 2>/dev/null; then
